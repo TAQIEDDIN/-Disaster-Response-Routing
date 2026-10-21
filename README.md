@@ -4,18 +4,6 @@ A local-first disaster-response web prototype for map-based damage review, incid
 
 > **Prototype notice:** This project is a decision-support prototype. AI detections, map data, facility listings, and calculated routes must be checked by qualified responders before operational use. The application does not provide authenticated roles and is not ready for public internet deployment.
 
-## LinkedIn project descriptions
-
-### English
-
-I built the computer-vision inference pipeline for **Afet Rota Sistemi**, a disaster-response mapping prototype. I integrated a pretrained Roboflow object-detection model and added OpenCV image enhancement (LAB/CLAHE contrast equalization and unsharp-mask sharpening), custom overlapping 640-pixel tile inference plus a full-image pass, and IoU-based non-maximum suppression to merge duplicate detections. The pipeline maps detection centers from image pixels to approximate geographic coordinates when image bounds are supplied, calculates a separate class-based heuristic risk score, and stores prediction metadata in SQLite without retaining uploaded images. I also connected these outputs to incident review and risk-aware route planning. The model itself was integrated, not trained as part of this repository; predictions remain unverified decision-support signals. The road graph currently focuses on Antakya, Türkiye.
-
-**Technology:** Python, FastAPI, Leaflet, OpenStreetMap/OSMnx, NetworkX, SQLite, Roboflow, WebSockets, and browser offline caching.
-
-### Türkçe
-
-**Afet Rota Sistemi** için bilgisayarlı görü çıkarım hattını geliştirdim. Önceden eğitilmiş Roboflow nesne tespit modelini entegre ettim; OpenCV ile LAB/CLAHE kontrast iyileştirme ve unsharp-mask keskinleştirme, örtüşmeli 640 piksellik parçalarda ve tüm görüntü üzerinde çıkarım, yinelenen kutuları birleştirmek için IoU tabanlı non-maximum suppression ekledim. Görüntü sınırları verildiğinde tespit merkezleri piksel koordinatlarından yaklaşık coğrafi koordinatlara dönüştürülüyor; sınıfa dayalı sezgisel risk puanı model güven skorundan ayrı hesaplanıyor. Analiz metaverileri SQLite'ta saklanıyor, yüklenen görüntüler saklanmıyor. Bu depoda modeli eğitmedim; Roboflow'daki önceden eğitilmiş modeli entegre ettim. Sonuçlar doğrulanmamış karar desteği olarak gösteriliyor ve rota planlamasına bağlanıyor. Yol ağı şu anda Antakya, Türkiye ile sınırlı.
-
 **Teknolojiler:** Python, FastAPI, Leaflet, OpenStreetMap/OSMnx, NetworkX, SQLite, Roboflow, WebSocket ve tarayıcı çevrimdışı önbelleği.
 
 ## Computer vision / AI pipeline
