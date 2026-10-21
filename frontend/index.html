@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disaster Route · Command Center</title>
+    <meta name="description" content="AI-powered disaster damage detection and safe route planning from aerial imagery">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- App CSS -->
+    <link rel="stylesheet" href="/static/style2.css?v=20261018-dark-cyan-v2" />
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+
+<!-- Theme Toggle Button (Sag Ust) -->
+<button id="themeToggleBtn" class="theme-toggle" title="Toggle theme">
+    <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+</button>
+
+<!-- Kontrol Paneli -->
+<div class="control-panel">
+    <div class="panel-header">
+        <div class="panel-header-row">
+            <div class="panel-brand-lockup">
+                <span class="panel-brand-mark" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17.5 9 7l4 8 2.5-5L20 17.5"/><circle cx="4" cy="17.5" r="1.5"/><circle cx="9" cy="7" r="1.5"/><circle cx="20" cy="17.5" r="1.5"/></svg>
+                </span>
+                <div class="panel-brand-copy">
+                    <span class="panel-eyebrow">FIELD OPERATIONS</span>
+                    <h1>Disaster Response Command</h1>
+                </div>
+            </div>
+            <!-- Weather Butonu + Kucult Butonu -->
+            <div class="panel-header-actions">
+                <button id="weatherBtn" class="btn-icon btn-weather" title="Weather">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg>
+                </button>
+        <button id="hidePanelBtn" class="btn-icon" title="Minimize panel">—</button>
+            </div>
+        </div>
+        <p>Plan safe routes and track field reports.</p>
+    </div>
+    
+    <div class="panel-body">
+        <div class="ops-banner" role="note">
+            <span class="ops-banner-icon" aria-hidden="true">!</span>
+            <div>
+                <strong>Image analysis · decision support</strong>
+                <p>Satellite imagery may be outdated. Verify AI findings in the field before treating damage as confirmed.</p>
+            </div>
+        </div>
+
+        <!-- Koordinat Giris Bolumu -->
+        <div class="coord-section">
+            <div class="coord-section-title">Start and destination <span>WGS84</span></div>
+
+            <!-- A Noktasi -->
+            <div class="coord-group point-a">
+                <div class="coord-group-label">
+                    <span class="coord-marker-badge" style="background:#3b82f6;">A</span>
+                    Start point
+                </div>
+                <div class="coord-inputs">
+                    <div class="coord-field">
+                        <label class="coord-label" for="coordALat">Latitude</label>
+                        <input type="number" id="coordALat" class="coord-input" placeholder="36.202300" step="0.000001" min="-90" max="90">
+                    </div>
+                    <div class="coord-field">
+                        <label class="coord-label" for="coordALon">Longitude</label>
+                        <input type="number" id="coordALon" class="coord-input" placeholder="36.161300" step="0.000001" min="-180" max="180">
+                    </div>
+                    <button id="applyABtn" class="btn btn-coord" title="Apply coordinates">Apply</button>
+                </div>
+            </div>
+
+            <!-- B Noktasi -->
+            <div class="coord-group point-b">
+                <div class="coord-group-label">
+                    <span class="coord-marker-badge" style="background:#ef4444;">B</span>
+                    Destination
+                </div>
+                <div class="coord-inputs">
+                    <div class="coord-field">
+                        <label class="coord-label" for="coordBLat">Latitude</label>
+                        <input type="number" id="coordBLat" class="coord-input" placeholder="36.205000" step="0.000001" min="-90" max="90">
+                    </div>
+                    <div class="coord-field">
+                        <label class="coord-label" for="coordBLon">Longitude</label>
+                        <input type="number" id="coordBLon" class="coord-input" placeholder="36.165000" step="0.000001" min="-180" max="180">
+                    </div>
+                    <button id="applyBBtn" class="btn btn-coord" title="Apply coordinates">Apply</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="route-mode-control">
+            <label for="routingMode">Route mode</label>
+            <select id="routingMode" class="route-mode-select">
+                <option value="balanced" selected>Balanced · time and risk</option>
+                <option value="fastest">Fastest · estimated time</option>
+                <option value="lowest_risk">Lowest risk</option>
+            </select>
+            <span>Unknown roads are marked as unknown.</span>
+        </div>
+
+        <!-- Aerial imagery tool, kept beside route settings for quick access. -->
+        <div class="drone-mode-section">
+            <button id="openDroneWorkspaceBtn" class="btn-drone">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Open Aerial Imagery Workspace
+            </button>
+        </div>
+
+        <div class="btn-group">
+            <button id="analizBtn" class="btn btn-primary">CALCULATE SAFE ROUTE</button>
+            <button id="resetBtn" class="btn btn-secondary">Reset</button>
+        </div>
+
+        <!-- Status Kutusu -->
+        <div id="offlineStatus" class="offline-status" role="status" aria-live="polite">Checking connection status…</div>
+        <div id="statusBox" class="status-box">Ready. Select points A and B on the map.</div>
+
+        <!-- Ilerleme Adimlari -->
+        <ul id="progressSteps" class="progress-steps">
+            <li id="stepCapture" class="progress-step">
+                <span class="step-icon">1</span> Capture map image
+            </li>
+            <li id="stepAI" class="progress-step">
+                <span class="step-icon">2</span> AI damage analysis
+            </li>
+            <li id="stepRoute" class="progress-step">
+                <span class="step-icon">3</span> Route calculation
+            </li>
+            <li id="stepDone" class="progress-step">
+                <span class="step-icon">4</span> Complete
+            </li>
+        </ul>
+
+        <!-- Istatistikler -->
+        <div id="statsGrid" class="stats-grid">
+            <div class="stat-card danger">
+                <div class="stat-value" id="statEnkaz">0</div>
+                <div class="stat-label">Incidents</div>
+            </div>
+            <div class="stat-card safe">
+                <div class="stat-value" id="statRota">0</div>
+                <div class="stat-label">Distance · Estimated time</div>
+                <div class="stat-meta" id="statRouteMeta"></div>
+            </div>
+        </div>
+
+        <section id="findingsPanel" class="findings-panel" aria-live="polite" hidden>
+            <div class="findings-heading">
+                <div>
+                    <span class="findings-eyebrow">AI SCAN</span>
+                    <h2>Findings to review</h2>
+                </div>
+                <span id="findingsCount" class="findings-count">0</span>
+            </div>
+            <p class="findings-note">AI prediction · not field verified</p>
+            <ul id="findingsList" class="findings-list"></ul>
+            <p id="findingsEmpty" class="findings-empty" hidden>No AI findings in this scan. Manually reported locations are shown on the map.</p>
+        </section>
+
+        <div class="panel-tools-heading"><span>QUICK ACCESS</span><span>FIELD TOOLS</span></div>
+        <!-- Recent Earthquakes & Acil Status & Damage findings Bildir Butonlari -->
+        <div class="feature-buttons">
+            <button id="earthquakeBtn" class="btn-feature">
+                <div class="feature-icon icon-earthquake">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                </div>
+                <div class="feature-text">
+                    <span>Recent Earthquakes</span>
+                    <span>Live earthquake data across Turkey</span>
+                </div>
+            </button>
+            <button id="emergencyBtn" class="btn-feature">
+                <div class="feature-icon icon-emergency">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </div>
+                <div class="feature-text">
+                    <span>Emergency Numbers</span>
+                    <span>Key emergency contacts</span>
+                </div>
+            </button>
+            <button id="reportDebrisBtn" class="btn-feature">
+                <div class="feature-icon icon-report">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </div>
+                <div class="feature-text">
+                    <span>Report / Add Incident</span>
+                    <span>Mark an incident location on the map</span>
+                </div>
+            </button>
+            <button id="openDashboardBtn" class="btn-feature">
+                <div class="feature-icon icon-report"><span style="font-size:16px;font-weight:800;">▦</span></div>
+                <div class="feature-text">
+                    <span>Command dashboard</span>
+                    <span>Reports and system status</span>
+                </div>
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<!-- Lejant -->
+<div id="legendPanel" class="legend-panel">
+    <h3>Map legend</h3>
+    <div class="legend-item">
+        <div class="legend-color" style="background: #00e676;"></div>
+        <span>Primary Route</span>
+    </div>
+    <div class="legend-item">
+        <div class="legend-color" style="background: #ffe500; opacity: 0.96;"></div>
+        <span>Alternative Route</span>
+    </div>
+    <div class="legend-item">
+        <div class="legend-circle" style="background: rgba(239,68,68,0.2); border-color: #ef4444;"></div>
+        <span>Hazard Zone</span>
+    </div>
+    <div class="legend-item">
+        <div class="legend-circle" style="background: #f87171; border-color: #dc2626; width:10px; height:10px;"></div>
+        <span>Incident Location</span>
+    </div>
+</div>
+
+<!-- Panel Acma Butonu (Panel Gizliyken Gorunur) -->
+<button id="showPanelBtn" class="btn-show-panel">
+    Command Center
+</button>
+
+<!-- Harita -->
+<div id="map"></div>
+
+<section id="emergencyMapPanel" class="emergency-map-panel" aria-label="Emergency locations">
+    <div class="emergency-map-heading">
+        <div>
+            <span class="emergency-map-kicker">OPENSTREETMAP</span>
+            <h2>Emergency Locations</h2>
+        </div>
+        <button id="refreshEmergencyLocations" class="emergency-refresh" type="button" title="Refresh data" aria-label="Refresh emergency locations">↻</button>
+    </div>
+    <div id="emergencyLocationFilters" class="emergency-location-filters">
+        <button type="button" data-location-type="hospital" aria-pressed="true">Hospital</button>
+        <button type="button" data-location-type="shelter" aria-pressed="true">Shelter</button>
+        <button type="button" data-location-type="assembly_point" aria-pressed="true">Assembly Point</button>
+        <button type="button" data-location-type="fire_station" aria-pressed="true">Fire Station</button>
+        <button type="button" data-location-type="police_station" aria-pressed="true">Police</button>
+        <button type="button" data-location-type="emergency_center" aria-pressed="true">Emergency Center</button>
+    </div>
+    <p id="emergencyLocationSync" class="emergency-location-sync" role="status">Loading emergency locations…</p>
+</section>
+
+<!-- Weather Paneli (sag ustte gorunur) -->
+<div id="weatherPanel" class="weather-panel">
+    <div class="weather-panel-header">
+        <span class="weather-panel-title">Weather</span>
+        <button id="weatherPanelClose" class="modal-close" style="width:24px;height:24px;font-size:14px;">&times;</button>
+    </div>
+    <div id="weatherContent" class="weather-content">
+        <div class="eq-loading"><div class="spinner"></div>Loading…</div>
+    </div>
+</div>
+
+<!-- Deprem Listesi Modal -->
+<div id="earthquakeModal" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2>
+                <span class="modal-header-icon eq-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                </span>
+                Recent Earthquakes
+            </h2>
+            <button class="modal-close" id="earthquakeModalClose">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="earthquakeListContent">
+                <div class="eq-loading">
+                    <div class="spinner"></div>
+                    Loading earthquake data…
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Emergency Numbers Modal -->
+<div id="emergencyModal" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2>
+                <span class="modal-header-icon em-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </span>
+                Emergency Numbers
+            </h2>
+            <button class="modal-close" id="emergencyModalClose">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="emergency-list" id="emergencyListContent">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gercek veriye dayali komuta paneli -->
+<div id="dashboardModal" class="modal-overlay">
+    <section class="modal-container dashboard-dialog" role="dialog" aria-modal="true" aria-labelledby="dashboardTitle">
+        <div class="modal-header">
+            <div>
+                <span class="dashboard-kicker">DISASTER RESPONSE · COMMAND CENTER</span>
+                <h2 id="dashboardTitle">Operations Overview</h2>
+            </div>
+            <button class="modal-close" id="dashboardClose" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body dashboard-body">
+            <div class="dashboard-toolbar">
+                <p id="dashboardUpdated" role="status">Loading data…</p>
+                <button type="button" id="dashboardRefresh" class="btn btn-secondary">Refresh</button>
+            </div>
+            <div class="dashboard-stats" id="dashboardStats" aria-live="polite"></div>
+            <form id="dashboardFilters" class="dashboard-filters">
+                <label>Severity<select name="severity"><option value="">All</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="critical">Critical</option></select></label>
+                <label>Incident type<select name="report_type"><option value="">All</option><option value="blocked_road">Blocked road</option><option value="building_damage">Building damage</option><option value="fire">Fire</option><option value="flood">Flooding</option><option value="infrastructure_damage">Infrastructure damage</option><option value="other_emergency">Other</option></select></label>
+                <label>Status<select name="status"><option value="">All</option><option>Reported</option><option>Under Review</option><option>Verified</option><option>Resolved</option></select></label>
+                <label>From date<input name="date_from" type="date"></label>
+                <label>To date<input name="date_to" type="date"></label>
+                <button class="btn btn-primary" type="submit">Apply filters</button>
+            </form>
+            <div class="dashboard-system" id="dashboardSystemStatus"></div>
+            <div class="dashboard-reports-heading"><h3>Recent Reports</h3><span id="dashboardReportCount"></span></div>
+            <div id="dashboardReports" class="dashboard-reports"><div class="dashboard-empty">Loading data…</div></div>
+            <section id="dashboardAiReviewSection" class="dashboard-ai-review" hidden>
+                <div class="dashboard-reports-heading"><h3>AI Analysis Review</h3><span>AI review is not physical field verification</span></div>
+                <div id="dashboardAiReviews" class="dashboard-ai-reviews"></div>
+            </section>
+        </div>
+    </section>
+</div>
+
+<!-- Damage findings Bildir Modal -->
+<div id="debrisReportModal" class="modal-overlay">
+    <div class="modal-container" style="width:440px;">
+        <div class="modal-header">
+            <h2>
+                <span class="modal-header-icon" style="background:rgba(239,68,68,0.12);color:#ef4444;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </span>
+                Report Incident
+            </h2>
+            <button class="modal-close" id="debrisReportClose">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p id="debrisReportInstruction" class="debris-instruction">Complete the form and select a location on the map.</p>
+            
+            <div id="debrisLocationSection" style="margin-bottom: 20px; padding: 15px; background: rgba(59, 130, 246, 0.1); border: 1px dashed rgba(59, 130, 246, 0.5); border-radius: 8px; text-align: center;">
+                <button type="button" id="selectDebrisMapBtn" class="btn btn-secondary" style="margin-bottom: 8px; width: 100%;">
+                    📍 Select Location on Map
+                </button>
+                <button type="button" id="autoDebrisMapBtn" class="btn btn-primary" style="width: 100%; margin-bottom: 8px;">
+                    🎯 Use Default Location (City Center)
+                </button>
+                <button type="button" id="autoGpsMapBtn" class="btn" style="width: 100%; background-color: #f59e0b; color: white; margin-bottom: 8px;">
+                    📡 Use Device GPS
+                </button>
+                <div id="debrisReportCoords" class="debris-coords" style="display:none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(59, 130, 246, 0.3);">
+                    <span id="debrisReportLatLng" style="color: #34d399; font-weight: 600; font-size: 13px;"></span>
+                </div>
+            </div>
+
+            <form id="debrisReportForm" class="debris-form">
+                <div class="form-group">
+                    <label class="form-label" for="incidentType">Incident Type</label>
+                    <select id="incidentType" class="form-input" required>
+                        <option value="blocked_road">Blocked road</option>
+                        <option value="building_damage" selected>Building damage</option>
+                        <option value="fire">Fire</option>
+                        <option value="flood">Flooding</option>
+                        <option value="infrastructure_damage">Infrastructure damage</option>
+                        <option value="other_emergency">Other emergency</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="incidentSeverity">Severity</label>
+                    <select id="incidentSeverity" class="form-input" required>
+                        <option value="medium" selected>Medium</option>
+                        <option value="low">Low</option>
+                        <option value="high">High</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="debrisName">Name</label>
+                    <input type="text" id="debrisName" class="form-input" placeholder="Optional">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Estimated Damage Level</label>
+                    <select id="debrisCollapseRate" class="form-input">
+                        <option value="">Select (optional)</option>
+                        <option value="hafif">Minor damage (10–30%)</option>
+                        <option value="orta">Moderate damage (30–60%)</option>
+                        <option value="agir">Severe damage (60–90%)</option>
+                        <option value="tamamen">Destroyed (90–100%)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Estimated People Trapped</label>
+                    <input type="number" id="debrisPersonCount" class="form-input" placeholder="Optional" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Medical Condition</label>
+                    <select id="debrisHealthStatus" class="form-input">
+                        <option value="">Select (optional)</option>
+                        <option value="iyi">Well · no injuries</option>
+                        <option value="hafif_yarali">Minor injuries</option>
+                        <option value="agir_yarali">Severe injuries · urgent assistance</option>
+                        <option value="bilinmiyor">Unknown</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Contact number</label>
+                    <input type="tel" id="debrisPhone" class="form-input" placeholder="Optional">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="debrisNote">Description</label>
+                    <textarea id="debrisNote" class="form-input form-textarea" placeholder="Briefly describe the incident" rows="2" required maxlength="2000"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="incidentImage">Photo (optional)</label>
+                    <input type="file" id="incidentImage" class="form-input" accept="image/jpeg,image/png,image/webp">
+                    <small class="form-help">JPG, PNG, or WebP · up to 10 MB</small>
+                </div>
+                <button type="submit" class="btn btn-primary" id="debrisSubmitBtn" style="margin-top:10px;">Submit Report</button>
+                <div id="debrisFormMessage" class="debris-form-message"></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JS Kutuphaneleri -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<!-- Firebase SDK (compat versiyonu — basit kullanim) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<!-- Firebase Config -->
+<script src="/static/firebase-config.js"></script>
+
+<!-- Drone Modu Overlay Ekrani (Baslangicta Gizli) -->
+<div id="droneModeOverlay" class="drone-overlay">
+    <div class="drone-toolbar">
+        <div class="drone-toolbar-left drone-title-group">
+            <div class="drone-brand-mark" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v8m-4-4h8"/><circle cx="12" cy="12" r="9"/><path d="M4.9 4.9 7 7m10 10 2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/></svg>
+            </div>
+            <div class="drone-title-copy">
+                <span class="drone-eyebrow">DISASTER RESPONSE <i></i> AIR OPS</span>
+                <h2>Aerial Image Analysis</h2>
+            <span id="droneInstruction" class="drone-instruction">1. Click the image to select the start point (A).</span>
+            </div>
+        </div>
+        <div class="drone-gps-row">
+            <div class="drone-gps-heading"><span class="gps-heading-icon">⌖</span><span>Image coordinates</span></div>
+            <div class="drone-gps-field">
+                <label>NW Lat</label>
+                <input type="number" id="droneNWLat" class="drone-gps-input" step="0.00001" placeholder="36.205">
+            </div>
+            <div class="drone-gps-field">
+                <label>NW Lon</label>
+                <input type="number" id="droneNWLon" class="drone-gps-input" step="0.00001" placeholder="36.158">
+            </div>
+            <div class="drone-gps-field">
+                <label>SE Lat</label>
+                <input type="number" id="droneSELat" class="drone-gps-input" step="0.00001" placeholder="36.200">
+            </div>
+            <div class="drone-gps-field">
+                <label>SE Lon</label>
+                <input type="number" id="droneSELon" class="drone-gps-input" step="0.00001" placeholder="36.165">
+            </div>
+        </div>
+        <div class="drone-toolbar-right">
+            <button id="droneAnalyzeBtn" class="btn btn-primary" disabled>Start Analysis</button>
+            <button id="droneCloseBtn" class="btn btn-secondary">Close</button>
+        </div>
+    </div>
+    <div class="drone-workspace-empty" id="droneWorkspaceEmpty">
+        <label for="droneFileInput" class="drone-huge-upload-area">
+            <span class="upload-kicker"><span class="upload-kicker-dot"></span> MISSION INPUT</span>
+            <div class="drone-upload-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
+            <h3>Upload Drone / Helicopter Image</h3>
+            <p>Drop an image of the damage here or choose one from your device.</p>
+            <span class="drone-upload-action">Choose image <b>↗</b></span>
+            <span class="drone-upload-formats">SUPPORTED FORMATS <strong>JPG</strong> <strong>PNG</strong></span>
+        </label>
+        <input type="file" id="droneFileInput" accept="image/*" style="display:none;">
+    </div>
+    
+    <div class="drone-canvas-container" id="droneCanvasContainer" style="display:none;">
+        <canvas id="droneCanvas"></canvas>
+        <div class="drone-analysis-meta" id="droneAnalysisMeta" hidden>
+            <span class="drone-ai-badge">AI PREDICTION · NOT FIELD VERIFIED</span>
+            <span id="droneAnalysisId" class="drone-analysis-id"></span>
+            <small>Locations are estimated from the entered NW/SE bounds.</small>
+        </div>
+    </div>
+</div>
+
+<!-- App JS -->
+<script src="/static/application.js?v=20261018-language-en-v2"></script>
+</body>
+</html>

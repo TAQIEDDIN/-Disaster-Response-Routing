@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+.DS_Store
+*.pt
+cache/
+map_cache/
+*.png
+*.webp
+viewport_*.png

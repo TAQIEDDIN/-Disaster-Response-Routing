@@ -1,9 +1,3 @@
-<img width="1892" height="876" alt="Ekran görüntüsü 2026-10-21 213740" src="https://github.com/user-attachments/assets/a1f94ee4-b915-4790-a3f5-7dcda0a5721a" />
-<img width="1905" height="910" alt="Ekran görüntüsü 2026-10-21 213829" src="https://github.com/user-attachments/assets/3ea43379-8f47-474f-8877-bfd4a5335362" />
-
-
-
-
 # Afet Rota Sistemi | Disaster Response Routing
 
 A local-first disaster-response web prototype for map-based damage review, incident reporting, and safer route planning. The current road graph covers Antakya, Hatay, Türkiye.
